@@ -4,6 +4,14 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 
+class Board(models.Model):
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+
 class Task(models.Model):
 
     STATUS_CHOICES = [
@@ -25,8 +33,11 @@ class Task(models.Model):
     priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='medium')
     due_date = models.DateField(null=True, blank=True)
     assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_tasks')
-    reviewer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='reviewing_tasks') # <--- MUSS HIER SEIN!
+    reviewer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='reviewing_tasks')
+
+    board = models.ForeignKey(Board, on_delete=models.SET_NULL, null=True, blank=True, related_name='tasks') 
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.title
+
