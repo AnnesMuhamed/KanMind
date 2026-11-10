@@ -1,3 +1,8 @@
+"""
+URL configuration for the Kanban app API endpoints.
+Maps endpoints for boards, tasks, contacts, and comments to their respective generic views.
+"""
+
 from django.urls import path
 from kanban_app.api.views import (
     BoardListCreateAPIView, 

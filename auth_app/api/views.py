@@ -6,56 +6,54 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from auth_app.api.serializers import RegistrationSerializer
 
 
-
 class RegistrationView(APIView):
+    """
+    API view that handles new user registration.
+    Allows unauthenticated access and returns an authentication token upon success.
+    """
     permission_classes = [AllowAny]
 
     def post(self, request):
+        """Validates registration data and returns user details with a token."""
         serializer = RegistrationSerializer(data=request.data)
-
-        data = {}
-
         if serializer.is_valid():
-            saved_account = serializer.save()
+            user = serializer.save()
+            return Response(self._get_user_data(user))
+        return Response(serializer.errors)
 
-            token, created =Token.objects.get_or_create(
-                user=saved_account
-            )
+    def _get_user_data(self, user):
+        """Helper method to generate token and response payload for a user."""
+        token, created = Token.objects.get_or_create(user=user)
+        return {
+            'token': token.key,
+            'username': user.username,
+            'email': user.email
+        }
 
-            data = {
-                'token': token.key,
-                'username': saved_account.username,
-                'email': saved_account.email
-            }
-        else:
-            data = serializer.errors
-
-        return Response(data)
 
 class CustomLoginView(ObtainAuthToken):
+    """
+    Custom login view that authenticates users and returns
+    their token along with user data.
+    """
     permission_classes = [AllowAny]
 
     def post(self, request):
+        """Authenticates user credentials and returns token data."""
         serializer = self.serializer_class(
             data=request.data,
             context={'request': request}
         )
-
-        data = {}
-
         if serializer.is_valid():
             user = serializer.validated_data['user']
+            return Response(self._get_user_data(user))
+        return Response(serializer.errors)
 
-            token, created = Token.objects.get_or_create(
-                user=user
-            )
-
-            data = {
-                'token': token.key,
-                'username': user.username,
-                'email': user.email
-            }
-        else:
-            data = serializer.errors
-
-        return Response(data)
+    def _get_user_data(self, user):
+        """Helper method to retrieve token and response payload for authenticated user."""
+        token, created = Token.objects.get_or_create(user=user)
+        return {
+            'token': token.key,
+            'username': user.username,
+            'email': user.email
+        }

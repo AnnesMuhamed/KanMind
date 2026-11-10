@@ -1,10 +1,16 @@
+"""
+Database models for the Kanban application.
+Defines structures for Boards, Contacts, Tasks, and Comments with clean relationships.
+"""
+
 from django.db import models
 from django.contrib.auth.models import User
 
 
-# Create your models here.
-
 class Board(models.Model):
+    """
+    Represents a Kanban board containing multiple tasks.
+    """
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -12,7 +18,12 @@ class Board(models.Model):
     def __str__(self):
         return self.title
 
+
 class Contact(models.Model):
+    """
+    Represents a person or team member who can be assigned to tasks
+    or author comments, optionally linked to a Django user account.
+    """
     name = models.CharField(max_length=255)
     email = models.EmailField(unique=True)
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
@@ -20,7 +31,12 @@ class Contact(models.Model):
     def __str__(self):
         return self.name
 
+
 class Task(models.Model):
+    """
+    Represents a Kanban task within a board, tracking status, priority,
+    assigned contacts, reviewers, and due dates.
+    """
 
     STATUS_CHOICES = [
         ('to-do', 'To Do'),
@@ -50,7 +66,11 @@ class Task(models.Model):
     def __str__(self):
         return self.title
 
+
 class Comment(models.Model):
+    """
+    Represents a text comment written by a contact on a specific task.
+    """
     task = models.ForeignKey(Task, related_name='comments', on_delete=models.CASCADE)
     author = models.ForeignKey(Contact, on_delete=models.CASCADE, related_name='comments')
     text = models.TextField()
@@ -58,5 +78,3 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"Comment by {self.author.name} on {self.task.title}"
-
-

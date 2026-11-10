@@ -1,3 +1,8 @@
+"""
+URL configuration for the authentication app API endpoints.
+Maps registration and login requests to their respective views.
+"""
+
 from django.urls import path
 from auth_app.api.views import CustomLoginView, RegistrationView
 
