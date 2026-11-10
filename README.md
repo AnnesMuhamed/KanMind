@@ -1,38 +1,98 @@
-# KanMind Frontend Project
+```markdown
+# KanMind Backend
 
-![KanMind Logo](assets/icons/logo_icon.svg)
-
-Dieses Projekt ist ein einfaches Frontend, das mit **Vanilla JavaScript** (reines JavaScript ohne Frameworks) erstellt wurde. Es wurde speziell entwickelt, um Schülern der **Developer Akademie** mit Backend-Erfahrung den Einstieg in kleinere Frontend-Anpassungen zu erleichtern.
-
----
-
-## Voraussetzungen
-
-- Ein funktionierendes Django-Backend (`KanMind`), das **nicht** in diesem Projekt enthalten ist.
-- Visual Studio Code mit der **Live Server**-Erweiterung oder eine ähnliche Möglichkeit, die `index.html` auf oberster Ebene lokal im Browser zu starten.
+A robust RESTful API backend built with **Django** and **Django REST Framework (DRF)** for the KanMind Kanban application.
 
 ---
 
-## Nutzung
+## Features
 
-1. Stelle sicher, dass das Backend `KanMind` läuft.
-2. Öffne dieses Projekt in **Visual Studio Code**.
-3. Rechtsklicke auf die Datei `index.html` auf oberster Ebene und wähle **Open with Live Server**, um das Projekt zu starten.
-
----
-
-## Ziel des Projekts
-
-Dieses Frontend wurde bewusst mit **Vanilla JavaScript** erstellt, um die folgenden Ziele zu erreichen:
-
-- **Einfacher Einstieg**: Durch den Verzicht auf Frameworks wie React oder Angular bleibt der Code leicht verständlich und nachvollziehbar auch bei wenig Frontend-Erfahrung.
-- **Lernen durch Anpassung**: Schüler können den Code anpassen, um kleine Änderungen vorzunehmen und Frontend-Konzepte besser zu verstehen.
-- **Backend-Erweiterung**: Das Projekt lässt sich einfach an das bestehende Django-Backend `KanMind` anbinden.
+- **Token Authentication**: Secure user authentication via DRF Auth tokens.
+- **Board Management**: Create, read, update, and delete project boards.
+- **Task Management**: Full task tracking including status choices (`to-do`, `in-progress`, `review`, `done`), priorities, due dates, and assignments.
+- **Contacts**: Contact management with automatic initials generation for frontend UI rendering.
+- **Comments**: Interactive comments linked to tasks with automated timestamps and author resolution.
 
 ---
 
-## Hinweis
+## Prerequisites
 
-Dieses Projekt ist **ausschließlich für Schüler der Developer Akademie** gedacht und nicht zur freien Nutzung oder Weitergabe freigegeben.
+- Python 3.10 or higher
+- pip (Python package manager)
+- Virtualenv (recommended)
 
 ---
+
+## Getting Started
+
+Follow these steps to set up and run the project locally:
+
+1. **Clone the repository:**
+   ```bash
+   git clone <your-repository-url>
+   cd project.KanMind-main
+
+```
+
+2. **Create and activate a virtual environment:**
+```bash
+python -m venv .venv
+# On Windows:
+.venv\Scripts\activate
+# On macOS/Linux:
+source .venv/bin/activate
+
+```
+
+
+3. **Install dependencies:**
+```bash
+pip install -r requirements.txt
+
+```
+
+
+4. **Apply database migrations:**
+```bash
+python manage.py makemigrations
+python manage.py migrate
+
+```
+
+
+5. **Create a superuser (for Django Admin access):**
+```bash
+python manage.py createsuperuser
+
+```
+
+
+6. **Run the development server:**
+```bash
+python manage.py runserver
+
+```
+
+
+
+The API will be available at `http://127.0.0.1:8000/`.
+
+---
+
+## API Endpoints
+
+* **Authentication**: `/api-token-auth/` (POST to get token)
+* **Boards**: `/api/boards/`
+* **Contacts**: `/api/contacts/`
+* **Tasks**: `/api/tasks/`
+* **Comments**: `/api/comments/`
+
+---
+
+## License
+
+This project is developed as part of the Developer Akademie training curriculum.
+
+```
+
+```
