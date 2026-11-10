@@ -4,9 +4,21 @@ from kanban_app.models import Board, Task, Contact, Comment
 
 
 class ContactSerializer(serializers.ModelSerializer):
+    initials = serializers.SerializerMethodField()
+
     class Meta:
         model = Contact
-        fields = '__all__'
+        fields = ['id', 'name', 'email', 'user', 'initials']
+
+    def get_initials(self, obj):
+        if not obj.name:
+            return ""
+        names = obj.name.split()
+        if len(names) >= 2:
+            return (names[0][0] + names[-1][0]).upper()
+        elif len(names) == 1:
+            return names[0][:2].upper()
+        return ""
 
 class CommentSerializer(serializers.ModelSerializer):
     author_name = serializers.ReadOnlyField(source='author.name')
