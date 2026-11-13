@@ -9,8 +9,6 @@ from kanban_app.api.views import (
     BoardRetrieveUpdateDestroyAPIView, 
     TaskListCreateAPIView, 
     TaskRetrieveUpdateDestroyAPIView,
-    ContactListCreateAPIView,
-    ContactRetrieveUpdateDestroyAPIView,
     CommentListCreateAPIView,
     CommentRetrieveUpdateDestroyAPIView
     )
@@ -21,9 +19,6 @@ urlpatterns = [
     
     path('tasks/', TaskListCreateAPIView.as_view(), name='task-list-create'),
     path('tasks/<int:pk>/', TaskRetrieveUpdateDestroyAPIView.as_view(), name='task-detail'),
-    
-    path('contacts/', ContactListCreateAPIView.as_view(), name='contact-list-create'),
-    path('contacts/<int:pk>/', ContactRetrieveUpdateDestroyAPIView.as_view(), name='contact-detail'),
     
     path('comments/', CommentListCreateAPIView.as_view(), name='comment-list-create'),
     path('comments/<int:pk>/', CommentRetrieveUpdateDestroyAPIView.as_view(), name='comment-detail'),

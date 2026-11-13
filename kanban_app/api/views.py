@@ -1,7 +1,7 @@
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
-from kanban_app.models import Board, Comment, Contact, Task
-from kanban_app.api.serializers import BoardSerializer, TaskSerializer, ContactSerializer, CommentSerializer
+from kanban_app.models import Board, Comment, Task
+from kanban_app.api.serializers import BoardSerializer, TaskSerializer, CommentSerializer
 
 
 class BoardListCreateAPIView(generics.ListCreateAPIView):
@@ -41,26 +41,6 @@ class TaskRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     """
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
-    permission_classes = [IsAuthenticated]
-
-
-class ContactListCreateAPIView(generics.ListCreateAPIView):
-    """
-    API view to list all contacts or create a new contact.
-    Requires authentication.
-    """
-    queryset = Contact.objects.all()
-    serializer_class = ContactSerializer
-    permission_classes = [IsAuthenticated]
-
-
-class ContactRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
-    """
-    API view to retrieve, update, or delete a specific contact by ID.
-    Requires authentication.
-    """
-    queryset = Contact.objects.all()
-    serializer_class = ContactSerializer
     permission_classes = [IsAuthenticated]
 
 

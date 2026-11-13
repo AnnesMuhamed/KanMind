@@ -1,31 +1,6 @@
 from rest_framework import serializers
-from kanban_app.models import Board, Task, Contact, Comment
+from kanban_app.models import Board, Task, Comment
 
-
-class ContactSerializer(serializers.ModelSerializer):
-    """
-    Serializer for the Contact model.
-    Includes a custom method field to automatically generate initials from the contact's name.
-    """
-    initials = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Contact
-        fields = ['id', 'name', 'email', 'user', 'initials']
-
-    def get_initials(self, obj):
-        """
-        Calculates and returns uppercase initials based on the contact's full name
-        (e.g., 'John Doe' -> 'JD') for frontend UI rendering.
-        """
-        if not obj.name:
-            return ""
-        names = obj.name.split()
-        if len(names) >= 2:
-            return (names[0][0] + names[-1][0]).upper()
-        elif len(names) == 1:
-            return names[0][:2].upper()
-        return ""
 
 
 class CommentSerializer(serializers.ModelSerializer):
