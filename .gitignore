@@ -6,3 +6,6 @@ __pycache__/
 assets/
 pages/
 shared/
+index.html
+script.js
+styles.css
