@@ -1,59 +1,50 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from auth_app.api.serializers import RegistrationSerializer
 
 
+def _get_user_data(user):
+    """Returns the token and the user details for the auth response."""
+    token, created = Token.objects.get_or_create(user=user)
+    return {
+        'token': token.key,
+        'fullname': user.get_full_name(),
+        'email': user.email,
+        'user_id': user.id,
+    }
+
+
 class RegistrationView(APIView):
-    """
-    API view that handles new user registration.
-    Allows unauthenticated access and returns an authentication token upon success.
-    """
+    """Registers a new user and returns the token with user details."""
     permission_classes = [AllowAny]
 
     def post(self, request):
-        """Validates registration data and returns user details with a token."""
+        """Validates the registration data and creates the user."""
         serializer = RegistrationSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            return Response(self._get_user_data(user))
-        return Response(serializer.errors)
-
-    def _get_user_data(self, user):
-        """Helper method to generate token and response payload for a user."""
-        token, created = Token.objects.get_or_create(user=user)
-        return {
-            'token': token.key,
-            'username': user.username,
-            'email': user.email
-        }
+            data = _get_user_data(user)
+            return Response(data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CustomLoginView(ObtainAuthToken):
-    """
-    Custom login view that authenticates users and returns
-    their token along with user data.
-    """
+    """Logs a user in by email and returns the token with user details."""
     permission_classes = [AllowAny]
 
     def post(self, request):
-        """Authenticates user credentials and returns token data."""
-        serializer = self.serializer_class(
-            data=request.data,
-            context={'request': request}
-        )
+        """Checks email and password and returns the user details."""
+        data = {
+            'username': request.data.get('email'),
+            'password': request.data.get('password'),
+        }
+        serializer = self.serializer_class(data=data)
         if serializer.is_valid():
             user = serializer.validated_data['user']
-            return Response(self._get_user_data(user))
-        return Response(serializer.errors)
-
-    def _get_user_data(self, user):
-        """Helper method to retrieve token and response payload for authenticated user."""
-        token, created = Token.objects.get_or_create(user=user)
-        return {
-            'token': token.key,
-            'username': user.username,
-            'email': user.email
-        }
+            return Response(_get_user_data(user), status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
