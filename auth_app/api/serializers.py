@@ -4,51 +4,51 @@ from rest_framework import serializers
 
 class RegistrationSerializer(serializers.ModelSerializer):
     """
-    Serializer for handling user registration, validating password matching,
-    duplicate emails, and securely creating new user accounts with hashed passwords.
+    Validates registration data and creates a new user account.
     """
+
+    fullname = serializers.CharField(write_only=True)
     repeated_password = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'repeated_password']
+        fields = ['fullname', 'email', 'password', 'repeated_password']
 
         extra_kwargs = {
             'password': {
                 'write_only': True
-            }
+            },
+            'email': {'required': True}
         }
 
-    def save(self):
-        """
-        Validates that both passwords match, creates a new user instance,
-        hashes the password securely, and saves the account to the database.
-        """
-        pw = self.validated_data['password']
-        repeated_password = self.validated_data['repeated_password']
-
-        if pw != repeated_password:
-            raise serializers.ValidationError({
-                'password': 'Passwords must match.'
-            })  
-
-        account = User(
-             email=self.validated_data['email'],
-             username=self.validated_data['username']
-        )      
-
-        account.set_password(pw)
-        account.save()
-
-        return account
-
     def validate_email(self, value):
-        """
-        Validates that the provided email address is unique
-        and does not already exist in the database.
-        """
+        """Ensures the email address is not already registered."""
         if User.objects.filter(email=value).exists():
-              raise serializers.ValidationError(
-                   'Email already exists.'
-              )
+            raise serializers.ValidationError('Email already exists.')
         return value
+
+    def validate(self, attrs):
+        """Ensures that both password fields match."""
+        if attrs['password'] != attrs['repeated_password']:
+            raise serializers.ValidationError({'password': 'Passwords do not match.'})
+        return attrs
+
+    def create(self, validated_data):
+        """Creates the user with the email as username and a hashed password."""
+        first_name, last_name = self.split_fullname(validated_data['fullname'])
+        user = User(
+            username=validated_data['email'],
+            email=validated_data['email'],
+            first_name=first_name,
+            last_name=last_name
+        )
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
+
+    def split_fullname(self, fullname):
+        """Splits a full name into first name and last name."""
+        names = fullname.strip().split(' ', 1)
+        if len(names) > 1:
+            return names[0], names[1]
+        return names[0], ''
