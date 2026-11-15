@@ -2,9 +2,11 @@ from django.db.models import Q
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 
+from kanban_app.api.permissions import IsBoardOwnerOrMember
 from kanban_app.api.serializers import (
+    BoardDetailSerializer,
     BoardListSerializer,
-    BoardSerializer,
+    BoardUpdateSerializer,
     CommentSerializer,
     TaskSerializer,
 )
@@ -27,13 +29,15 @@ class BoardListCreateAPIView(generics.ListCreateAPIView):
 
 
 class BoardRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
-    """
-    API view to retrieve, update, or delete a specific board by ID.
-    Requires authentication.
-    """
+    """Shows, updates or deletes a single board."""
     queryset = Board.objects.all()
-    serializer_class = BoardSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated & IsBoardOwnerOrMember]
+
+    def get_serializer_class(self):
+        """Returns the serializer that fits the request method."""
+        if self.request.method == 'PATCH':
+            return BoardUpdateSerializer
+        return BoardDetailSerializer
 
 
 class TaskListCreateAPIView(generics.ListCreateAPIView):
