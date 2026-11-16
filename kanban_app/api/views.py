@@ -1,9 +1,9 @@
-from django.shortcuts import get_object_or_404
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 
-from kanban_app.api.permissions import IsBoardOwnerOrMember
+from kanban_app.api.permissions import IsBoardOwnerOrMember, IsTaskBoardMember
 from kanban_app.api.serializers import (
     BoardDetailSerializer,
     BoardListSerializer,
@@ -42,7 +42,7 @@ class BoardRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class TaskCreateAPIView(generics.CreateAPIView):
-    """Create a task on a board the user belongs to."""
+    """Creates a task on a board the user belongs to."""
     serializer_class = TaskSerializer
     permission_classes = [IsAuthenticated & IsBoardOwnerOrMember]
 
@@ -55,19 +55,15 @@ class TaskCreateAPIView(generics.CreateAPIView):
         return super().create(request, *args, **kwargs)
 
     def perform_create(self, serializer):
-        """Saves the task with the current user as creator"""
+        """Saves the task with the current user as creator."""
         serializer.save(created_by=self.request.user)
 
 
-
 class TaskRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
-    """
-    API view to retrieve, update, or delete a specific task by ID.
-    Requires authentication.
-    """
+    """Updates or deletes a single task."""
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated & IsTaskBoardMember]
 
 
 class CommentListCreateAPIView(generics.ListCreateAPIView):
