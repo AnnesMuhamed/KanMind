@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
@@ -40,14 +41,23 @@ class BoardRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
         return BoardDetailSerializer
 
 
-class TaskListCreateAPIView(generics.ListCreateAPIView):
-    """
-    API view to list all tasks or create a new task.
-    Requires authentication.
-    """
-    queryset = Task.objects.all()
+class TaskCreateAPIView(generics.CreateAPIView):
+    """Create a task on a board the user belongs to."""
     serializer_class = TaskSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated & IsBoardOwnerOrMember]
+
+    def create(self, request, *args, **kwargs):
+        """Checks that the board exists and the user may use it."""
+        board_id = request.data.get('board')
+        if isinstance(board_id, int):
+            board = get_object_or_404(Board, pk=board_id)
+            self.check_object_permissions(request, board)
+        return super().create(request, *args, **kwargs)
+
+    def perform_create(self, serializer):
+        """Saves the task with the current user as creator"""
+        serializer.save(created_by=self.request.user)
+
 
 
 class TaskRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):

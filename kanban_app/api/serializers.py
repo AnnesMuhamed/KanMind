@@ -48,13 +48,52 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class TaskSerializer(serializers.ModelSerializer):
-    """
-    Serializer for the Task model, managing all task-related fields including
-    status, priority, assignments, reviewers, and due dates with explicit field mapping.
-    """
+    """Serializes a task and accepts assignee and reviewer by id."""
+    assignee = UserSerializer(read_only=True)
+    reviewer = UserSerializer(read_only=True)
+    assignee_id = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(), source='assignee',
+        write_only=True, required=False, allow_null=True,
+    )
+    reviewer_id = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(), source='reviewer',
+        write_only=True, required=False, allow_null=True,
+    )
+    comments_count = serializers.SerializerMethodField()
+
     class Meta:
         model = Task
-        fields = ['id', 'board', 'title', 'description', 'status', 'priority', 'assigned_to', 'reviewer', 'due_date', 'created_at']
+        fields = [
+            'id', 'board', 'title', 'description', 'status', 'priority',
+            'assignee', 'reviewer', 'assignee_id', 'reviewer_id',
+            'due_date', 'comments_count',
+        ]
+
+    def get_comments_count(self, obj):
+        """Returns the number of comments of the task."""
+        return obj.comments.count()
+
+    def validate(self, attrs):
+        """Checks that assignee and reviewer are members of the board."""
+        board = self.get_board(attrs)
+        for field in ['assignee', 'reviewer']:
+            user = attrs.get(field)
+            if user and user not in board.members.all():
+                raise serializers.ValidationError(
+                    {f'{field}_id': 'User must be a member of the board.'}
+                )
+        return attrs
+
+    def get_board(self, attrs):
+        """Returns the board and prevents moving a task to another board."""
+        board = attrs.get('board')
+        if self.instance is None:
+            return board
+        if board is not None and board != self.instance.board:
+            raise serializers.ValidationError(
+                {'board': 'Changing the board is not allowed.'}
+            )
+        return self.instance.board
 
 
 class BoardListSerializer(serializers.ModelSerializer):
