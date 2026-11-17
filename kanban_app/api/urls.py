@@ -12,12 +12,15 @@ from kanban_app.api.views import (
     TaskCreateAPIView,
     TaskRetrieveUpdateDestroyAPIView,
     CommentListCreateAPIView,
-    CommentDestroyAPIView
+    CommentDestroyAPIView,
+    EmailCheckAPIView
 )
 
 urlpatterns = [
     path('boards/', BoardListCreateAPIView.as_view(), name='board-list-create'),
     path('boards/<int:pk>/', BoardRetrieveUpdateDestroyAPIView.as_view(), name='board-detail'),
+
+        path('email-check/', EmailCheckAPIView.as_view(), name='email-check'),
 
     path('tasks/', TaskCreateAPIView.as_view(), name='task-create'),
     path('tasks/assigned-to-me/', AssignedToMeTaskListAPIView.as_view(), name='tasks-assigned-to-me'),

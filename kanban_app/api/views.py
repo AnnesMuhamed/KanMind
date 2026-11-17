@@ -1,7 +1,10 @@
+from django.contrib.auth.models import User
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from kanban_app.api.permissions import (
     IsBoardOwnerOrMember,
@@ -14,6 +17,7 @@ from kanban_app.api.serializers import (
     BoardUpdateSerializer,
     CommentSerializer,
     TaskSerializer,
+    UserSerializer,
 )
 from kanban_app.models import Board, Comment, Task
 
@@ -117,3 +121,20 @@ class CommentDestroyAPIView(generics.DestroyAPIView):
     def get_queryset(self):
         """Returns only comments of the task from the URL."""
         return Comment.objects.filter(task=self.kwargs['task_id'])
+
+
+class EmailCheckAPIView(APIView):
+    """Returns the user with the given email address."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """Checks the email and returns the matching user."""
+        email = request.query_params.get('email')
+        if not email or '@' not in email:
+            return Response(
+                {'email': 'A valid email address is required'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        user = get_object_or_404(User, email=email)
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
