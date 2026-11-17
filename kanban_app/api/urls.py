@@ -5,19 +5,23 @@ Maps endpoints for boards, tasks, contacts, and comments to their respective gen
 
 from django.urls import path
 from kanban_app.api.views import (
+    AssignedToMeTaskListAPIView,
     BoardListCreateAPIView,
     BoardRetrieveUpdateDestroyAPIView,
-    TaskRetrieveUpdateDestroyAPIView,
+    ReviewingTaskListAPIView,
     TaskCreateAPIView,
+    TaskRetrieveUpdateDestroyAPIView,
     CommentListCreateAPIView,
     CommentRetrieveUpdateDestroyAPIView
-    )
+)
 
 urlpatterns = [
     path('boards/', BoardListCreateAPIView.as_view(), name='board-list-create'),
     path('boards/<int:pk>/', BoardRetrieveUpdateDestroyAPIView.as_view(), name='board-detail'),
 
     path('tasks/', TaskCreateAPIView.as_view(), name='task-create'),
+    path('tasks/assigned-to-me/', AssignedToMeTaskListAPIView.as_view(), name='tasks-assigned-to-me'),
+    path('tasks/reviewing/', ReviewingTaskListAPIView.as_view(), name='tasks-reviewing'),
     path('tasks/<int:pk>/', TaskRetrieveUpdateDestroyAPIView.as_view(), name='task-detail'),
 
     path('comments/', CommentListCreateAPIView.as_view(), name='comment-list-create'),

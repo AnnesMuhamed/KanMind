@@ -66,6 +66,26 @@ class TaskRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated & IsTaskBoardMember]
 
 
+class AssignedToMeTaskListAPIView(generics.ListAPIView):
+    """Lists all tasks assigned to the current user."""
+    serializer_class = TaskSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        """Returns only tasks where the user is the assignee."""
+        return Task.objects.filter(assignee=self.request.user)
+
+
+class ReviewingTaskListAPIView(generics.ListAPIView):
+    """Lists all tasks the current user has to review."""
+    serializer_class = TaskSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        """Returns only tasks where the user is the reviewer."""
+        return Task.objects.filter(reviewer=self.request.user)
+
+
 class CommentListCreateAPIView(generics.ListCreateAPIView):
     """
     API view to list all comments or create a new comment.
