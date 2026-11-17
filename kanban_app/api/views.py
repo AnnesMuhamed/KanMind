@@ -3,7 +3,11 @@ from django.shortcuts import get_object_or_404
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 
-from kanban_app.api.permissions import IsBoardOwnerOrMember, IsTaskBoardMember
+from kanban_app.api.permissions import (
+    IsBoardOwnerOrMember,
+    IsCommentAuthor,
+    IsTaskBoardMember,
+)
 from kanban_app.api.serializers import (
     BoardDetailSerializer,
     BoardListSerializer,
@@ -87,20 +91,29 @@ class ReviewingTaskListAPIView(generics.ListAPIView):
 
 
 class CommentListCreateAPIView(generics.ListCreateAPIView):
-    """
-    API view to list all comments or create a new comment.
-    Requires authentication.
-    """
-    queryset = Comment.objects.all()
+    """Lists and creates the comments of a task."""
     serializer_class = CommentSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated & IsTaskBoardMember]
+
+    def get_task(self):
+        """Returns the task from the URL and checks the permission."""
+        task = get_object_or_404(Task, pk=self.kwargs['task_id'])
+        self.check_object_permissions(self.request, task)
+        return task
+
+    def get_queryset(self):
+        """Returns all comments of the task."""
+        return self.get_task().comments.all()
+
+    def perform_create(self, serializer):
+        """Saves the comment with its task and the current user as author."""
+        serializer.save(task=self.get_task(), author=self.request.user)
 
 
-class CommentRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
-    """
-    API view to retrieve, update, or delete a specific comment by ID.
-    Requires authentication.
-    """
-    queryset = Comment.objects.all()
-    serializer_class = CommentSerializer
-    permission_classes = [IsAuthenticated]
+class CommentDestroyAPIView(generics.DestroyAPIView):
+    """Deletes a comment of a task."""
+    permission_classes = [IsAuthenticated & IsCommentAuthor]
+
+    def get_queryset(self):
+        """Returns only comments of the task from the URL."""
+        return Comment.objects.filter(task=self.kwargs['task_id'])

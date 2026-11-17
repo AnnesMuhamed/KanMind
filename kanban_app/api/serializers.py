@@ -36,15 +36,16 @@ class BoardTaskSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    """
-    Serializer for the Comment model.
-    Resolves the author's name automatically using a read-only field source.
-    """
-    author_name = serializers.ReadOnlyField(source='author.name')
+    """Serializes a comment with the full name of its author."""
+    author = serializers.SerializerMethodField()
 
     class Meta:
         model = Comment
-        fields = ['id', 'task', 'author', 'author_name', 'text', 'created_at']
+        fields = ['id', 'created_at', 'author', 'content']
+
+    def get_author(self, obj):
+        """Returns the full name of the comment author."""
+        return obj.author.get_full_name()
 
 
 class TaskSerializer(serializers.ModelSerializer):
