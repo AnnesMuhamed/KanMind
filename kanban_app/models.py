@@ -8,13 +8,14 @@ from django.contrib.auth.models import User
 from django.db import models
 
 
-
 class Board(models.Model):
     """
     Represents a Kanban board with an owner and its members.
     """
     title = models.CharField(max_length=200)
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owned_boards')
+    owner = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='owned_boards'
+    )
     members = models.ManyToManyField(User, related_name='boards', blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -45,14 +46,27 @@ class Task(models.Model):
         ('high', 'High'),
     ]
 
-    board = models.ForeignKey(Board, on_delete=models.CASCADE, related_name='tasks')
+    board = models.ForeignKey(
+        Board, on_delete=models.CASCADE, related_name='tasks'
+    )
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True, default='')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='to-do')
-    priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='medium')
-    assignee = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_tasks')
-    reviewer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='reviewed_tasks')
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_tasks')
+    priority = models.CharField(
+        max_length=20, choices=PRIORITY_CHOICES, default='medium'
+    )
+    assignee = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='assigned_tasks'
+    )
+    reviewer = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='reviewed_tasks'
+    )
+    created_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True,
+        related_name='created_tasks'
+    )
     due_date = models.DateField()
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -67,8 +81,12 @@ class Comment(models.Model):
     """
     Represents a comment written by a user on a task.
     """
-    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='comments')
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
+    task = models.ForeignKey(
+        Task, on_delete=models.CASCADE, related_name='comments'
+    )
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='comments'
+    )
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 

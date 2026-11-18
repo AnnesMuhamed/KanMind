@@ -30,11 +30,13 @@ class RegistrationSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         """Ensures that both password fields match."""
         if attrs['password'] != attrs['repeated_password']:
-            raise serializers.ValidationError({'password': 'Passwords do not match.'})
+            raise serializers.ValidationError(
+                {'password': 'Passwords do not match.'}
+            )
         return attrs
 
     def create(self, validated_data):
-        """Creates the user with the email as username and a hashed password."""
+        """Creates the user with email as username and a hashed password."""
         first_name, last_name = self.split_fullname(validated_data['fullname'])
         user = User(
             username=validated_data['email'],
